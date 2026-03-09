@@ -1,0 +1,6 @@
+import machine
+led = machine.Pin("LED", machine.Pin.OUT)
+led.off()
+print("iamamonkey")
+led.on()
+led.off()
