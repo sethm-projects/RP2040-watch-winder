@@ -19,10 +19,29 @@ VccDisp = Pin(2,Pin.OUT, value = 1)
 i2c = I2C(0,sda = Pin(0),scl = Pin(1),freq = 400000)
 display = ssd1306.SSD1306_I2C(width, height, i2c)
 
+# KY-040 rotary encoder on voltage supply/resistor board
+VccEnc = Pin(12, Pin.OUT, value = 1)
+sw = Pin(13,Pin.IN, Pin.PULL_UP)
+a = Pin(14,Pin.IN,Pin.PULL_UP)
+b = Pin(15,Pin.IN,Pin.PULL_UP)
+
 # Hello world
 display.text('Hello, World!', 0, 0, 1)
 display.show()
 
-time.sleep(2)
+#initialize toggle for switch on rotary encoder
+switch_toggle = 0
+switch_state_last = 1
 
-display.poweroff()
+#Listen for switch state change
+while True:
+    switch_state_current = sw.value()
+    if switch_state_last != switch_state_current:
+        switch_state_last = switch_state_current # re-set last state for next iteration
+        if switch_state_current == 0:
+            if switch_toggle == 0:
+                display.poweroff()
+                switch_toggle = 1
+            elif switch_toggle == 1:
+                display.poweron()
+                switch_toggle = 0
