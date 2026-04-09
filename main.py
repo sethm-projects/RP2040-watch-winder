@@ -1,16 +1,6 @@
-from machine import Pin, I2C
+from machine import Pin, I2C, RTC
 import time
 import ssd1306
-
-#spi = machine.SPI(0, )
-
-led = Pin("LED", Pin.OUT)
-
-# while True:
-#     led.off()
-#     time.sleep(2)
-#     led.on()
-#     time.sleep(2)
 
 # ssd1306 0.91 inch 128*32 display, white, i2c
 width = 128
@@ -29,11 +19,26 @@ b = Pin(15,Pin.IN,Pin.PULL_UP)
 display.text('Hello, World!', 0, 0, 1)
 display.show()
 
-#initialize toggle for switch on rotary encoder
+#First connection test for DS3231 RTC
+devices = i2c.scan()
+if len(devices) == 0:
+    print("no i2c device")
+else:
+    print('i2c devices found:')
+    for device in devices:
+        print(hex(device))
+        
+# try:
+#     rtc = RTC()
+# except:
+#     print("rtc type not supported by machine")
+#     rtc = None
+
+# #initialize toggle for switch on rotary encoder
 switch_toggle = 0
 switch_state_last = 1
 
-#Listen for switch state change
+# #Listen for switch state change
 while True:
     switch_state_current = sw.value()
     if switch_state_last != switch_state_current:
@@ -45,3 +50,4 @@ while True:
             elif switch_toggle == 1:
                 display.poweron()
                 switch_toggle = 0
+

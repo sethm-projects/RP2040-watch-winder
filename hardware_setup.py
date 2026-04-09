@@ -1,5 +1,4 @@
-# ssd1306_setup.py
-
+# This file contains the variable definitions for the hardware connections
 from machine import Pin, I2C
 import gc
 import time
@@ -9,14 +8,26 @@ from gui.core.ugui import Display
 # ssd1306 0.91 inch 128*32 display, white, i2c
 width = 128
 height = 32
-VccDisp = Pin(2,Pin.OUT, value = 1)
-i2c = I2C(0,sda = Pin(0),scl = Pin(1),freq = 400000)
+VccDisp = Pin(2,Pin.OUT, value = 1) #GP6 powers the display
 
 # KY-040 rotary encoder on voltage supply/resistor board
-VccEnc = Pin(12, Pin.OUT, value = 1)
-sw = Pin(13,Pin.IN, Pin.PULL_UP)
-a = Pin(14,Pin.IN,Pin.PULL_UP)
-b = Pin(15,Pin.IN,Pin.PULL_UP)
+VccEnc = Pin(12, Pin.OUT, value = 1) #GP12 powers the encoder
+sw = Pin(13,Pin.IN, Pin.PULL_UP) #GP13 is connected to the momentary switch on the rotary encoder
+a = Pin(14,Pin.IN,Pin.PULL_UP) #GP14 is connected to the "A" signal output on the rotary encoder
+b = Pin(15,Pin.IN,Pin.PULL_UP) #GP15 is connected to the "B" signal output on the rotary encoder
+
+# ds3231 RTC on carrier board with battery
+VccRTC = Pin(3, Pin.OUT, value = 1) #GP3 powers the RTC
+
+#i2c comms setup
+i2c = I2C(0,sda = Pin(0),scl = Pin(1),freq = 400000) #GP0 is sda and GP1 is scl for i2c0 bus
+devices = i2c.scan()
+if len(devices) == 0:
+    print("no i2c device")
+else:
+    print('i2c devices found:')
+    for device in devices:
+    print(hex(device))
 
 gc.collect()  # Precaution before instantiating framebuf
 ssd = SSD(i2c, width, height)  # Create a display instance
