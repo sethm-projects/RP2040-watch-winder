@@ -1,6 +1,9 @@
+import uasyncio as asyncio
 from machine import Pin, I2C, RTC
 import time
 import ssd1306
+
+from switch import Switch
 
 # ssd1306 0.91 inch 128*32 display, white, i2c
 width = 128
@@ -11,9 +14,11 @@ display = ssd1306.SSD1306_I2C(width, height, i2c)
 
 # KY-040 rotary encoder on voltage supply/resistor board
 VccEnc = Pin(12, Pin.OUT, value = 1)
-sw = Pin(13,Pin.IN, Pin.PULL_UP)
+sw_pin = Pin(13,Pin.IN, Pin.PULL_UP)
 a = Pin(14,Pin.IN,Pin.PULL_UP)
 b = Pin(15,Pin.IN,Pin.PULL_UP)
+
+sw = Switch(sw_pin, 50)
 
 # Hello world
 display.text('Hello, World!', 0, 0, 1)
@@ -34,20 +39,24 @@ else:
 #     print("rtc type not supported by machine")
 #     rtc = None
 
-# #initialize toggle for switch on rotary encoder
-switch_toggle = 0
-switch_state_last = 1
-
 # #Listen for switch state change
-while True:
-    switch_state_current = sw.value()
-    if switch_state_last != switch_state_current:
-        switch_state_last = switch_state_current # re-set last state for next iteration
-        if switch_state_current == 0:
-            if switch_toggle == 0:
-                display.poweroff()
-                switch_toggle = 1
-            elif switch_toggle == 1:
-                display.poweron()
-                switch_toggle = 0
+async def watch_switch():
+    # #initialize toggle for switch on rotary encoder
+    switch_toggle = 0
+    switch_state_last = 1
+    switch_state_current = sw.state()
 
+    while True:
+        await sw.wait_for_state_change
+        switch_state_current = sw.state()
+        if switch_state_last != switch_state_current:
+            switch_state_last = switch_state_current # re-set last state for next iteration
+            if switch_state_current == 0:
+                if switch_toggle == 0:
+                    display.poweroff()
+                    switch_toggle = 1
+                elif switch_toggle == 1:
+                    display.poweron()
+                    switch_toggle = 0
+
+asyncio.spawn(watch_switch)
