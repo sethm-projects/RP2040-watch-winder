@@ -25,7 +25,7 @@ class Switch:
         self._task = asyncio.create_task(self._watch())
         self._stopped = False
 
-    def stop(self):
+    def stop(self) -> void:
         if self._stopped:
             return
         self._task.cancel()
@@ -36,7 +36,7 @@ class Switch:
         """Returns the current input state"""
         return self._debounce.state
 
-    async def wait_for_state_change(): void
+    async def wait_for_state_change() -> void:
         """Waits for the debounced state to change"""
         await self._debounce.wait_for_state_change()
 
@@ -46,7 +46,7 @@ class Switch:
             self._raw_state = new_state
             self._flag.set()
 
-    async def _watch(self):
+    async def _watch(self) -> void:
         while True:
             try:
                 await self._flag.wait()
