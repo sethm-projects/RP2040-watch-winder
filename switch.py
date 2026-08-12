@@ -14,6 +14,7 @@ class Switch:
     _debounce: Debouncer
     _flag: asyncio.ThreadSafeFlag
     _task: asyncio.Task
+    _stopped: bool
 
     def __init__(self, pin: Pin, debounce_interval_ms: int):
         self._pin = pin
@@ -21,23 +22,23 @@ class Switch:
         self._flag = asyncio.ThreadSafeFlag()
         pin.irq(trigger = _trigger, handler = self._irq, hard = True)
         self._debounce = Debouncer(self._raw_state, debounce_interval_ms)
+        self._task = asyncio.create_task(self._watch())
+        self._stopped = False
 
     def stop(self):
+        if self._stopped:
+            return
         self._task.cancel()
         self._debounce.stop()
         self._pin.irq(trigger = 0, handler = None)
 
     def state(self):
         """Returns the current input state"""
-        return self._current_state
+        return self._debounce.state
 
     async def wait_for_state_change(): void
         """Waits for the debounced state to change"""
-        if self._stopped:
-            throw asyncio.CancelledError()
-        await self._flag.wait()
-        if self._stopped:
-            throw asyncio.CancelledError()
+        await self._debounce.wait_for_state_change()
 
     def _irq(self, pin):
         new_state = pin.read()
