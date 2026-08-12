@@ -41,11 +41,13 @@ class Debouncer:
         # This also doubles as an indicator that we were bouncing.
         self._bounce_timer = None
         # Signals when a state change happens
-        self._ready_flag = asyncio.ThreadSafeFlag()
+        self._flag = asyncio.ThreadSafeFlag()
         # Signals when we have shut the debouncer down and will send no more events
-        self._stopped = false
+        self._stopped = False
 
     def stop(): void
+        if self._stopped:
+            return
         self._stopped = true
         if self._bounce_timer != None:
             self._bounce_timer.cancel()
@@ -72,13 +74,13 @@ class Debouncer:
                 self._bounce_timer.cancel()
                 self._last_transition = when_ms
             return
-        if state == self._last_state and self._last_transition != None and ticks_diff(when_ms, self._last_transition) < self._interval_ms:
+        if observed_state == self._last_state and self._last_transition != None and ticks_diff(when_ms, self._last_transition) < self._interval_ms:
             # We're returning to the previous state only a short time after the last state transition.
             # This could be a bounce, so give it time to settle before we accept the new state.
             self._last_transition = when_ms
-            # Since we shouldn't be transitioning states at the time we settle, we can't rely on a state
-            # transition event to inform us that we need to update the current state. We'll need a timer
-            # to do that.
+            # Since we don't expect the raw input state to transition at the time we settle, we can't rely
+            # on a state transition event to inform us that we need to update the current state. We'll need
+            # a timer to do that.
             if self._bounce_timer != None:
                 self._bounce_timer.cancel()
             self._bounce_timer = asyncio.create_task(self._wait_for_settle())
@@ -95,7 +97,7 @@ class Debouncer:
         self._last_transition = when_ms
 
     async def _wait_for_settle(self):
-        """Waits for the state to settle after a bounce return us to _last_state.
+        """Waits for the state to settle after a bounce returns us to _last_state.
         If we stay there long enough, we treat it as a state transition."""
         try:
             await asyncio.sleep_ms(self._interval_ms)
