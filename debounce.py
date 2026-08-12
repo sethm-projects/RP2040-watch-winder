@@ -45,10 +45,10 @@ class Debouncer:
         # Signals when we have shut the debouncer down and will send no more events
         self._stopped = False
 
-    def stop(): void
+    def stop(self) -> void:
         if self._stopped:
             return
-        self._stopped = true
+        self._stopped = True
         if self._bounce_timer != None:
             self._bounce_timer.cancel()
 
@@ -56,15 +56,15 @@ class Debouncer:
         """Returns the current input state"""
         return self._current_state
 
-    async def wait_for_state_change(): void
+    async def wait_for_state_change(self) -> void:
         """Waits for the debounced state to change"""
         if self._stopped:
-            throw asyncio.CancelledError()
+            raise asyncio.CancelledError()
         await self._flag.wait()
         if self._stopped:
-            throw asyncio.CancelledError()
+            raise asyncio.CancelledError()
 
-    def record_state(self, observed_state):
+    def record_state(self, observed_state) -> void:
         """Takes a new observed input state and, if appropriate, transitions to it"""
         when_ms = ticks_ms()
         if observed_state == self._current_state:
@@ -96,7 +96,7 @@ class Debouncer:
             self._flag.set()
         self._last_transition = when_ms
 
-    async def _wait_for_settle(self):
+    async def _wait_for_settle(self) -> void:
         """Waits for the state to settle after a bounce returns us to _last_state.
         If we stay there long enough, we treat it as a state transition."""
         try:
