@@ -1,11 +1,10 @@
 from machine import Pin
-from micropython import const
 from time import ticks_ms
 import uasyncio as asyncio
 
 from debounce import Debouncer
 
-_trigger = const(Pin.IRQ_RISING | Pin.IRQ_FALLING)
+_trigger = Pin.IRQ_RISING | Pin.IRQ_FALLING
 
 class Switch:
     """A debounced switch tied to a GPIO pin"""
@@ -36,7 +35,7 @@ class Switch:
         """Returns the current input state"""
         return self._debounce.state
 
-    async def wait_for_state_change() -> None:
+    async def wait_for_state_change(self) -> None:
         """Waits for the debounced state to change"""
         await self._debounce.wait_for_state_change()
 

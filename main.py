@@ -47,7 +47,7 @@ async def watch_switch():
     switch_state_current = sw.state()
 
     while True:
-        await sw.wait_for_state_change
+        await sw.wait_for_state_change()
         switch_state_current = sw.state()
         if switch_state_last != switch_state_current:
             switch_state_last = switch_state_current # re-set last state for next iteration
@@ -59,4 +59,4 @@ async def watch_switch():
                     display.poweron()
                     switch_toggle = 0
 
-asyncio.spawn(watch_switch)
+asyncio.create_task(watch_switch())

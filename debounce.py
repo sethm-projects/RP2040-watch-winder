@@ -111,4 +111,4 @@ class Debouncer:
             curr = self._current_state
             self._current_state = self._last_state
             self._last_state = curr
-            self.flag.set()
+            self._flag.set()
